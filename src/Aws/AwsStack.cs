@@ -1,7 +1,7 @@
 using Amazon.CDK;
-using Amazon.CDK.AWS.SNS;
-using Amazon.CDK.AWS.SNS.Subscriptions;
-using Amazon.CDK.AWS.SQS;
+using Amazon.CDK.AWS.APIGateway;
+using Amazon.CDK.AWS.Lambda;
+using Cdklabs.DynamoTableViewer;
 using Constructs;
 
 namespace Aws
@@ -10,15 +10,29 @@ namespace Aws
     {
         internal AwsStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
-             // The CDK includes built-in constructs for most resource types, such as Queues and Topics.
-            var queue = new Queue(this, "AwsQueue", new QueueProps
+            var hello = new Function(this, "HelloHandler", new FunctionProps
             {
-                VisibilityTimeout = Duration.Seconds(300)
+                Runtime = Runtime.NODEJS_14_X,
+                Code = Code.FromAsset("lambda"),
+                Handler = "hello.handler"
             });
 
-            var topic = new Topic(this, "AwsTopic");
+            var helloWithCounter = new HitCounter(this, "HelloHitCounter", new HitCounterProps
+            {
+                Downstream = hello
+            });
 
-            topic.AddSubscription(new SqsSubscription(queue));
+            new LambdaRestApi(this, "Endpoint", new LambdaRestApiProps
+            {
+                Handler = helloWithCounter.Handler
+            });
+
+            new TableViewer(this, "ViewerHitCount", new TableViewerProps
+            {
+                Title = "Hello Hits",
+                Table = helloWithCounter.MyTable,
+                SortBy = "-hits"
+            });
         }
     }
 }
