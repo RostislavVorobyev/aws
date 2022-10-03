@@ -7,7 +7,7 @@ namespace Aws
         public static void Main(string[] args)
         {
             var app = new App();
-            new WorkshopPipelineStack(app, "WorkshopPipelineStack");
+            new PipelineStack(app, "WorkshopPipelineStack");
             app.Synth();
         }
     }

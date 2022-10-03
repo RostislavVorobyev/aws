@@ -5,9 +5,9 @@ using Constructs;
 
 namespace Aws
 {
-    public class WorkshopPipelineStack : Stack
+    public class PipelineStack : Stack
     {
-        public WorkshopPipelineStack(Construct parent, string id, IStackProps props = null) : base(parent, id, props)
+        public PipelineStack(Construct parent, string id, IStackProps props = null) : base(parent, id, props)
         {
             var repo = new Repository(this, "WorkshopRepo", new RepositoryProps
             {
@@ -16,18 +16,21 @@ namespace Aws
 
             var pipeline = new CodePipeline(this, "Pipeline", new CodePipelineProps
             {
-                PipelineName = "WorkshpPipeline",
+                PipelineName = "WorkshopPipeline",
+
                 Synth = new ShellStep("Synth", new ShellStepProps
                 {
-                    Input = CodePipelineSource.CodeCommit(repo, "master"),
-                    Commands = new string[]
-                    {
+                    Input = CodePipelineSource.CodeCommit(repo, "main"),
+                    Commands = new string[] {
                         "npm install -g aws-cdk",
                         "sudo apt-get install -y dotnet-sdk-3.1",
                         "dotnet build"
                     }
-                })
+                }),
             });
+
+            var deploy = new PipelineStage(this, "Deploy");
+            var deployStage = pipeline.AddStage(deploy);
         }
     }
 }
