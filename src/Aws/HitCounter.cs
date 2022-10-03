@@ -1,4 +1,5 @@
-﻿using Amazon.CDK.AWS.DynamoDB;
+﻿using Amazon.CDK;
+using Amazon.CDK.AWS.DynamoDB;
 using Amazon.CDK.AWS.Lambda;
 using Constructs;
 using System.Collections.Generic;
@@ -22,8 +23,9 @@ namespace Aws
                 PartitionKey = new Attribute
                 {
                     Name = "path",
-                    Type = AttributeType.STRING
-                }
+                    Type = AttributeType.STRING,
+                },
+                RemovalPolicy = RemovalPolicy.DESTROY
             });
             MyTable = table;
 
